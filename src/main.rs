@@ -8,11 +8,11 @@ const SCREEN_HEIGHT: i32 = 50;
 const MAP_WIDTH: i32 = 80;
 const MAP_HEIGHT: i32 = 45;
 
-const COLOR_DARK_WALL: Color = Color { r: 0, g: 0, b: 100 };
+const COLOR_DARK_WALL: Color = Color { r: 100, g: 0, b: 100 };
 const COLOR_DARK_GROUND: Color = Color {
-    r: 50,
-    g: 50,
-    b: 150
+    r: 160,
+    g: 150,
+    b: 180
 };
 
 const LIMIT_FPS: i32 = 30; // Frames per second max.
