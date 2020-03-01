@@ -32,13 +32,14 @@ impl Object {
     }
 
     // set the color and draw the character for this object
+    // `dyn` means that Console is a trait and not a concrete type
     pub fn draw(&self, con: &mut dyn Console) {
         con.set_default_foreground(self.color);
         con.put_char(self.x, self.y, self.char, BackgroundFlag::None);
     }
 }
 
-fn handle_keys(tcod: &mut Tcod, player_x: &mut i32, player_y: &mut i32) -> bool {
+fn handle_keys(tcod: &mut Tcod, player: &mut Object) -> bool {
     use tcod::input::Key;
     use tcod::input::KeyCode::*;
 
@@ -58,10 +59,10 @@ fn handle_keys(tcod: &mut Tcod, player_x: &mut i32, player_y: &mut i32) -> bool 
         Key { code: Escape, .. } => return true, // exit game
 
         // movement keys
-        Key { code: Up, .. } => *player_y -= 1,
-        Key { code: Down, .. } => *player_y += 1,
-        Key { code: Left, .. } => *player_x -= 1,
-        Key { code: Right, .. } => *player_x += 1,
+        Key { code: Up, .. } => player.move_by(0, -1),
+        Key { code: Down, .. } => player.move_by(0, 1),
+        Key { code: Left, .. } => player.move_by(-1, 0),
+        Key { code: Right, .. } => player.move_by(1, 0),
 
         _ => {}
     }
@@ -84,10 +85,24 @@ fn main() {
     let mut player_x = SCREEN_WIDTH / 2;
     let mut player_y = SCREEN_HEIGHT / 2;
 
+    // object representing player
+    let player = Object::new(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, '@', WHITE);
+
+    // NPC object
+    let npc = Object::new(SCREEN_WIDTH / 2 - 5, SCREEN_HEIGHT / 2, '@', YELLOW);
+
+    // the list of objects
+    let mut objects = [player, npc];
+
     while !tcod.root.window_closed() {
-        tcod.con.set_default_foreground(tcod::colors::WHITE);
+        // clear previous frame
         tcod.con.clear();
-        tcod.con.put_char(player_x, player_y, '@', BackgroundFlag::None);
+
+        // draw objects
+        for object in &objects {
+            object.draw(&mut tcod.con);
+        }
+
         blit(
             &tcod.con,
             (0, 0),
@@ -97,9 +112,12 @@ fn main() {
             1.0,
             1.0,
         );
+
         tcod.root.flush();
+
         // handle keys and exit the game if needed
-        let exit = handle_keys(&mut tcod, &mut player_x, &mut player_y);
+        let player = &mut objects[0];
+        let exit = handle_keys(&mut tcod, player);
         if exit {
             break;
         }
